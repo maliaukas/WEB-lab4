@@ -48,10 +48,13 @@ public class Polyclinic {
         return isOpened;
     }
 
-    public synchronized void endWork() {
+    public void endWork() {
         isOpened = false;
-        for (var doc: doctors) {
+        for (var doc : doctors) {
             try {
+                synchronized (doc) {
+                    doc.notify();
+                }
                 doc.join();
             } catch (Exception e) {
                 e.printStackTrace();

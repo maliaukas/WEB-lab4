@@ -1,7 +1,7 @@
 package model;
 
-import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.concurrent.PriorityBlockingQueue;
 
 public class Doctor extends Thread {
     private final int id;
@@ -12,17 +12,17 @@ public class Doctor extends Thread {
     private int curedPatientsCount;
     private Polyclinic polyclinic;
 
-    public void setPolyclinic(Polyclinic polyclinic) {
-        this.polyclinic = polyclinic;
-    }
-
     public Doctor(int id, Speciality speciality, int maxPatientsCount) {
         this.id = id;
         this.speciality = speciality;
 
         this.maxPatientsCount = maxPatientsCount;
         this.curedPatientsCount = 0;
-        this.patientQueue = new PriorityQueue<>();
+        this.patientQueue = new PriorityBlockingQueue<>();
+    }
+
+    public void setPolyclinic(Polyclinic polyclinic) {
+        this.polyclinic = polyclinic;
     }
 
     public void addPatient(Patient p) throws Exception {
@@ -48,13 +48,12 @@ public class Doctor extends Thread {
     @Override
     public synchronized void run() {
         while (polyclinic.isOpened()) {
-            while (patientQueue.isEmpty()) {
+            if (patientQueue.isEmpty()) {
                 try {
-                    synchronized (this) {
-                        wait();
-                    }
+                    wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
+                    Thread.currentThread().interrupt();
                 }
             }
 
@@ -63,6 +62,7 @@ public class Doctor extends Thread {
                 patient.cure(this);
                 curedPatientsCount++;
             }
+
             if (curedPatientsCount == maxPatientsCount)
                 break;
         }
