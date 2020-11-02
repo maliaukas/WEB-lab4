@@ -1,6 +1,11 @@
-package model;
+package controller;
+
+import model.Doctor;
+import model.DoctorException;
+import model.Patient;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Polyclinic {
     ArrayList<Doctor> doctors;
@@ -11,12 +16,14 @@ public class Polyclinic {
     }
 
     public void addPatient(Patient p) {
+        Random random = new Random();
         for (var doc : doctors) {
             if (doc.getSpeciality() == p.getRequiredDoctorSpeciality()) {
                 try {
+                    p.setPriority(random.nextInt(doc.getMaxPatientsCount()));
                     doc.addPatient(p);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } catch (DoctorException e) {
+                    System.out.println(e.getMessage());
                     continue;
                 }
                 System.out.println("Пациент " + p.getId() +

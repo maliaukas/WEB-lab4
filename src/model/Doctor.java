@@ -1,5 +1,7 @@
 package model;
 
+import controller.Polyclinic;
+
 import java.util.Queue;
 import java.util.concurrent.PriorityBlockingQueue;
 
@@ -25,20 +27,14 @@ public class Doctor extends Thread {
         this.polyclinic = polyclinic;
     }
 
-    public void addPatient(Patient p) throws Exception {
+    public synchronized void addPatient(Patient p) throws DoctorException {
         if (curedPatientsCount + patientQueue.size() + 1 <= maxPatientsCount) {
-            try {
-                patientQueue.add(p);
-            } catch (Exception e) {
-                System.err.println(e.getMessage());
-            }
+            patientQueue.add(p);
         } else {
-            throw new Exception("Cannot add patient to the queue!");
+            throw new DoctorException("Невозможно добавить пациента " + p.getId()
+                    + " в очередь к врачу " + id +
+                    ": максимальное число пациентов достигнуто!");
         }
-    }
-
-    public int getMaxPatientsCount() {
-        return maxPatientsCount;
     }
 
     public Speciality getSpeciality() {
@@ -61,6 +57,11 @@ public class Doctor extends Thread {
                 var patient = patientQueue.poll();
                 patient.cure(this);
                 curedPatientsCount++;
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
 
             if (curedPatientsCount == maxPatientsCount)
@@ -70,6 +71,9 @@ public class Doctor extends Thread {
                 "вылечив пациентов: " + curedPatientsCount);
     }
 
+    public int getMaxPatientsCount() {
+        return maxPatientsCount;
+    }
 
     public int getDoctorId() {
         return id;
