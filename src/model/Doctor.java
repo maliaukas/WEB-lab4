@@ -2,17 +2,21 @@ package model;
 
 import controller.Polyclinic;
 
-import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Doctor extends Thread {
     private final int id;
     private final Speciality speciality;
 
     private final int maxPatientsCount;
-    private final Queue<Patient> patientQueue;
+    private final BlockingQueue<Patient> patientQueue;
     private Integer curedPatientsCount;
     private Polyclinic polyclinic;
+
+    private Lock lock;
 
     public Doctor(int id, Speciality speciality, int maxPatientsCount) {
         this.id = id;
@@ -21,6 +25,8 @@ public class Doctor extends Thread {
         this.maxPatientsCount = maxPatientsCount;
         this.curedPatientsCount = 0;
         this.patientQueue = new PriorityBlockingQueue<>();
+
+        lock = new ReentrantLock();
     }
 
     public void setPolyclinic(Polyclinic polyclinic) {
@@ -28,7 +34,8 @@ public class Doctor extends Thread {
     }
 
     public void addPatient(Patient p) throws DoctorException {
-        synchronized (curedPatientsCount) {
+        lock.lock();
+        try {
             if (curedPatientsCount + patientQueue.size() + 1 <= maxPatientsCount) {
                 patientQueue.add(p);
             } else {
@@ -36,6 +43,8 @@ public class Doctor extends Thread {
                         + " в очередь к врачу " + id +
                         ": максимальное число пациентов достигнуто!");
             }
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -46,35 +55,28 @@ public class Doctor extends Thread {
     @Override
     public synchronized void run() {
         while (polyclinic.isOpened()) {
-            synchronized (curedPatientsCount) {
-                if (curedPatientsCount == maxPatientsCount)
-                    break;
+            Patient patient = null;
+            try {
+                patient = patientQueue.take();
+            } catch (InterruptedException e) {
+                printSummary("прерывание");
+                return;
             }
-
-            if (patientQueue.isEmpty()) {
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                    Thread.currentThread().interrupt();
-                }
+            patient.cure(this);
+            lock.lock();
+            curedPatientsCount++;
+            if (curedPatientsCount == maxPatientsCount) {
+                printSummary("вылечил макс. число пациентов");
+                return;
             }
-
-            while (!patientQueue.isEmpty()) {
-                var patient = patientQueue.poll();
-                patient.cure(this);
-                synchronized (curedPatientsCount) {
-                    curedPatientsCount++;
-                }
-//                try {
-//                    Thread.sleep(3000);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-            }
+            lock.unlock();
         }
-        System.out.println("Доктор " + id + " завершил работу, " +
-                "вылечив пациентов: " + curedPatientsCount);
+        printSummary("конец рабочего дня");
+    }
+
+    public void printSummary(String reason) {
+        System.out.println("Доктор " + id + " завершил работу по причине: " + reason +
+                ", \n\tвылечив пациентов: " + curedPatientsCount);
     }
 
     public int getMaxPatientsCount() {

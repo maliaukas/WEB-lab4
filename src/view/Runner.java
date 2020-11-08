@@ -38,10 +38,8 @@ public class Runner {
             polyclinic.addPatient(new Patient(4, Doctor.Speciality.DENTIST));
             polyclinic.addPatient(new Patient(5, Doctor.Speciality.GYNECOLOGIST));
             polyclinic.addPatient(new Patient(10, Doctor.Speciality.GYNECOLOGIST));
-
             polyclinic.addPatient(new Patient(9, Doctor.Speciality.THERAPIST));
             polyclinic.addPatient(new Patient(7, Doctor.Speciality.DENTIST));
-
 
             polyclinic.endWork();
 

@@ -28,13 +28,6 @@ public class Polyclinic {
                 }
                 System.out.println("Пациент " + p.getId() +
                         " записался в очередь ко врачу " + doc.getDoctorId());
-                try {
-                    synchronized (doc) {
-                        doc.notify();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
                 return;
             }
         }
@@ -59,10 +52,11 @@ public class Polyclinic {
         isOpened = false;
         for (var doc : doctors) {
             try {
-                synchronized (doc) {
-                    doc.notify();
-                }
+                doc.interrupt();
                 doc.join();
+
+
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
