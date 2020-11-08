@@ -11,7 +11,7 @@ public class Doctor extends Thread {
 
     private final int maxPatientsCount;
     private final Queue<Patient> patientQueue;
-    private int curedPatientsCount;
+    private Integer curedPatientsCount;
     private Polyclinic polyclinic;
 
     public Doctor(int id, Speciality speciality, int maxPatientsCount) {
@@ -27,13 +27,15 @@ public class Doctor extends Thread {
         this.polyclinic = polyclinic;
     }
 
-    public synchronized void addPatient(Patient p) throws DoctorException {
-        if (curedPatientsCount + patientQueue.size() + 1 <= maxPatientsCount) {
-            patientQueue.add(p);
-        } else {
-            throw new DoctorException("Невозможно добавить пациента " + p.getId()
-                    + " в очередь к врачу " + id +
-                    ": максимальное число пациентов достигнуто!");
+    public void addPatient(Patient p) throws DoctorException {
+        synchronized (curedPatientsCount) {
+            if (curedPatientsCount + patientQueue.size() + 1 <= maxPatientsCount) {
+                patientQueue.add(p);
+            } else {
+                throw new DoctorException("Невозможно добавить пациента " + p.getId()
+                        + " в очередь к врачу " + id +
+                        ": максимальное число пациентов достигнуто!");
+            }
         }
     }
 
@@ -44,6 +46,11 @@ public class Doctor extends Thread {
     @Override
     public synchronized void run() {
         while (polyclinic.isOpened()) {
+            synchronized (curedPatientsCount) {
+                if (curedPatientsCount == maxPatientsCount)
+                    break;
+            }
+
             if (patientQueue.isEmpty()) {
                 try {
                     wait();
@@ -56,16 +63,15 @@ public class Doctor extends Thread {
             while (!patientQueue.isEmpty()) {
                 var patient = patientQueue.poll();
                 patient.cure(this);
-                curedPatientsCount++;
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                synchronized (curedPatientsCount) {
+                    curedPatientsCount++;
                 }
+//                try {
+//                    Thread.sleep(3000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
             }
-
-            if (curedPatientsCount == maxPatientsCount)
-                break;
         }
         System.out.println("Доктор " + id + " завершил работу, " +
                 "вылечив пациентов: " + curedPatientsCount);

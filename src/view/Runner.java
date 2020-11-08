@@ -1,8 +1,8 @@
 package view;
 
+import controller.Polyclinic;
 import model.Doctor;
 import model.Patient;
-import controller.Polyclinic;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,14 +31,17 @@ public class Runner {
             polyclinic.startWork();
 
             polyclinic.addPatient(new Patient(1, Doctor.Speciality.GYNECOLOGIST));
+            polyclinic.addPatient(new Patient(8, Doctor.Speciality.DENTIST));
             polyclinic.addPatient(new Patient(2, Doctor.Speciality.GYNECOLOGIST));
+            polyclinic.addPatient(new Patient(6, Doctor.Speciality.THERAPIST));
             polyclinic.addPatient(new Patient(3, Doctor.Speciality.GYNECOLOGIST));
             polyclinic.addPatient(new Patient(4, Doctor.Speciality.DENTIST));
             polyclinic.addPatient(new Patient(5, Doctor.Speciality.GYNECOLOGIST));
-            polyclinic.addPatient(new Patient(6, Doctor.Speciality.THERAPIST));
+            polyclinic.addPatient(new Patient(10, Doctor.Speciality.GYNECOLOGIST));
+
             polyclinic.addPatient(new Patient(9, Doctor.Speciality.THERAPIST));
             polyclinic.addPatient(new Patient(7, Doctor.Speciality.DENTIST));
-            polyclinic.addPatient(new Patient(8, Doctor.Speciality.DENTIST));
+
 
             polyclinic.endWork();
 

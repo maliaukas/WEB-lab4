@@ -20,7 +20,7 @@ public class Patient implements Comparable<Patient> {
     }
 
     public void cure(Doctor doctor) {
-        System.out.println("Пациент " + id + " с приоритетом " + priority + " вылечен доктором "
+        System.out.println("Пациент " + id + /*" с приоритетом " + priority +*/ " вылечен врачом "
                 + doctor.getDoctorId() + "!");
     }
 
