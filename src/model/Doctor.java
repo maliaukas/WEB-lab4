@@ -4,9 +4,15 @@ import controller.Polyclinic;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
+
+/**
+ * Класс Врач-узкий специалист, который может принять ограниченное количество пациентов
+ *
+ * @author Александра Малявко
+ * @version 2020
+ */
 
 public class Doctor extends Thread {
     private static final Logger logger = LogManager.getLogger(Polyclinic.class.getName());
@@ -15,12 +21,18 @@ public class Doctor extends Thread {
     private final Speciality speciality;
     private final int maxPatientsCount;
 
-    private final BlockingQueue<Patient> patientQueue;
+    private final PriorityBlockingQueue<Patient> patientQueue;
     private final ReentrantLock lock;
     private Integer curedPatientsCount;
     private Polyclinic polyclinic;
 
-
+    /**
+     * Конструктор
+     *
+     * @param id               идентификатор врача
+     * @param speciality       специализация
+     * @param maxPatientsCount максимальное число пациентов
+     */
     public Doctor(int id, Speciality speciality, int maxPatientsCount) {
         this.id = id;
         this.speciality = speciality;
@@ -33,10 +45,22 @@ public class Doctor extends Thread {
         logger.info("Доктор " + id + " создан!");
     }
 
+    /**
+     * Метод, устанавливающий принадлежность врача к поликлинике
+     *
+     * @param polyclinic поликлиника, в которой работает врач
+     */
     public void setPolyclinic(Polyclinic polyclinic) {
         this.polyclinic = polyclinic;
     }
 
+
+    /**
+     * Метод, добавляющий пацента в очередь к врачу
+     *
+     * @param p пациент
+     * @throws DoctorException в случае, если максимальное число пациентов уже достигнуто
+     */
     public void addPatient(Patient p) throws DoctorException {
         lock.lock();
         try {
@@ -52,10 +76,18 @@ public class Doctor extends Thread {
         }
     }
 
+    /**
+     * Геттер для специализации врача
+     *
+     * @return специализацию
+     */
     public Speciality getSpeciality() {
         return speciality;
     }
 
+    /**
+     * Метод, выполняющий работу врача
+     */
     @Override
     public void run() {
         while (polyclinic.isOpened()) {
@@ -81,19 +113,37 @@ public class Doctor extends Thread {
         printSummary("конец рабочего дня");
     }
 
-    public void printSummary(String reason) {
+    /**
+     * Метод, выводящий в логгер сообщение о завершении работы врача по какой-либо причине
+     *
+     * @param reason причина завершения работы
+     */
+    private void printSummary(String reason) {
         logger.info("Доктор " + id + " завершил работу по причине: " + reason +
                 ", \n\tвылечив пациентов: " + curedPatientsCount);
     }
 
+    /**
+     * Геттер максимального числа пациентов, которое может принять врач
+     *
+     * @return максимальное число пациентов
+     */
     public int getMaxPatientsCount() {
         return maxPatientsCount;
     }
 
+    /**
+     * Геттер идентификатора врача
+     *
+     * @return идентификатор
+     */
     public int getDoctorId() {
         return id;
     }
 
+    /**
+     * Перечисление возможных специальностей врачей
+     */
     public enum Speciality {
         THERAPIST,      // терапевт
         RADIOLOGIST,    // рентгенолог

@@ -1,0 +1,1 @@
+typeSearchIndex = [{"l":"All Classes","url":"allclasses-index.html"},{"p":"model","l":"Doctor"},{"p":"model","l":"DoctorException"},{"p":"model","l":"Patient"},{"p":"controller","l":"Polyclinic"},{"p":"view","l":"Runner"},{"p":"model","l":"Doctor.Speciality"}]
