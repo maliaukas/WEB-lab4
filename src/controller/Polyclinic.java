@@ -3,16 +3,20 @@ package controller;
 import model.Doctor;
 import model.DoctorException;
 import model.Patient;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Random;
 
 public class Polyclinic {
+    private static final Logger logger = LogManager.getLogger(Polyclinic.class.getName());
     ArrayList<Doctor> doctors;
     private boolean isOpened;
 
     public Polyclinic(ArrayList<Doctor> doctors) {
         this.doctors = doctors;
+        logger.info("Поликлиника создана!");
     }
 
     public void addPatient(Patient p) {
@@ -23,15 +27,15 @@ public class Polyclinic {
                     p.setPriority(random.nextInt(doc.getMaxPatientsCount()));
                     doc.addPatient(p);
                 } catch (DoctorException e) {
-                    System.out.println(e.getMessage());
+                    logger.error(e.getMessage());
                     continue;
                 }
-                System.out.println("Пациент " + p.getId() +
+                logger.debug("Пациент " + p.getId() +
                         " записался в очередь ко врачу " + doc.getDoctorId());
                 return;
             }
         }
-        System.out.println("Пациент " + p.getId() +
+        logger.debug("Пациент " + p.getId() +
                 " не смог попасть к нужному врачу и уходит.");
     }
 
@@ -41,7 +45,7 @@ public class Polyclinic {
             doctor.setPolyclinic(this);
             doctor.start();
         }
-        System.out.println("Все доктора начали работу!");
+        logger.info("Все доктора начали работу!");
     }
 
     public boolean isOpened() {
@@ -54,13 +58,10 @@ public class Polyclinic {
             try {
                 doc.interrupt();
                 doc.join();
-
-
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        System.out.println("Все доктора закончили работу!");
+        logger.info("Все доктора закончили работу!");
     }
 }

@@ -1,6 +1,12 @@
 package model;
 
+import controller.Polyclinic;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 public class Patient implements Comparable<Patient> {
+    private static final Logger logger = LogManager.getLogger(Polyclinic.class.getName());
+
     private final int id;
     private final Doctor.Speciality requiredDoctorSpeciality;
     private int priority;
@@ -20,7 +26,7 @@ public class Patient implements Comparable<Patient> {
     }
 
     public void cure(Doctor doctor) {
-        System.out.println("Пациент " + id + /*" с приоритетом " + priority +*/ " вылечен врачом "
+        logger.debug("Пациент " + id + /*" с приоритетом " + priority +*/ " вылечен врачом "
                 + doctor.getDoctorId() + "!");
     }
 
